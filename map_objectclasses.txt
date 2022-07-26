@@ -1,0 +1,11 @@
+electric guitar  1 n03276921
+reflex camera  2 n04076546
+glass               3 n03443167
+knife               4 n03628765
+racket             5 n04045857
+mug		   6 n03802912
+headphones   7 n03266479
+backpack       8 n02772753
+shaker           9 n04190372
+blender        10 n02853991
+ukulele        11 n04513584
