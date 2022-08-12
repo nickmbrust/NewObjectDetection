@@ -1,5 +1,9 @@
 import torch
 import rave as r
+import sklearn as sk
+import LearningTools as LT
+
+Xtest, ytest = loaddata
 
 positive = torch.load('SWSLclassfeats/n02772753.tar')
 postivefeats = positive['features']
@@ -28,5 +32,10 @@ negativerave = r.RAVE()
 
 for j in len(negativefeats):
     negativerave.add(negativefeats[j])
+
+
+betas = LT.OLS(postiverave, 0.99)
+yest = Xtest @ betas
+error = yest - ytest
 
 

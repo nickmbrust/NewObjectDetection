@@ -3,6 +3,8 @@ import numpy as np
 import os
 import sklearn.utils
 import cv2
+import PIL.Image as Image
+
 
 def loadimgs(mainDir):
     mainDir = mainDir
@@ -21,6 +23,37 @@ def loadimgs(mainDir):
             loadImg = cv2.imread(imgPath, 0)
             X.append(loadImg)
             y.append(i)
-    X = np.array(X, dtype=np.float)
-    X, y = sklearn.utils.shuffle(X, y)
-    return X,y
+
+    X = np.array(X)
+    return X, y
+
+
+def loadClass(classFolder, transformer):
+    classDir = classFolder
+    cat = os.listdir(classDir)
+    X = []
+    y = []
+    for i in range(0, len(cat)):
+        imgPath = os.path.join(classDir, cat[i])
+        loadImg = Image.open(imgPath).convert('RGB')
+        loadImg = transformer(loadImg)
+        X.append(loadImg.numpy())
+        y.append(cat[i])
+    X = np.array(X)
+    return X, y
+
+
+def loadClip(classFolder):
+    classDir = classFolder
+    cat = os.listdir(classDir)
+    X = []
+    y = []
+    for i in range(0, len(cat)):
+        imgPath = os.path.join(classDir, cat[i])
+        loadImg = Image.open(imgPath)
+        # loadImg = transformer(loadImg)
+        X.append(loadImg)
+        y.append(cat[i])
+
+    return X, y
+
