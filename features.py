@@ -37,8 +37,8 @@ def Clipfeatures(net, x):
     return x
 
 
-model, preprocess = clip.load('RN50x4', device)
-print(clip.available_models())
+#model, preprocess = clip.load('RN50x4', device)
+#print(clip.available_models())
 
 
 # Billion-scale semi-supervised learning for image classification, https://arxiv.org/abs/1905.00546

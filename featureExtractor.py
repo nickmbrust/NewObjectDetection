@@ -5,7 +5,7 @@ from dataloader import loadimgs, loadClass, loadClip
 import features as f
 from PIL import Image
 from matplotlib import cm
-import clip
+#import clip
 import torch
 
 if torch.cuda.is_available():
@@ -13,9 +13,9 @@ if torch.cuda.is_available():
 else:
     device = torch.device("cpu")
 
-PATH = 'dataset/'
+PATH = 'backgroundata/'
 
-pathtrain = PATH + 'training/n02853991/'
+pathtrain = PATH + 'images'
 pathtest = PATH + 'test'
 
 swsltransformer = f.swsl_transform(128)
@@ -53,4 +53,4 @@ model.eval()
 for imgBatch in dataloaderSWSL:
     swslfeats = f.swslfeatures(model, imgBatch[0].to(device))
 # torch.save({"features": clipfeats}, 'Clipclassfeatures/n03628765.tar')
-torch.save({"features": swslfeats}, 'SWSLclassfeats/n02853991.tar')
+torch.save({"features": swslfeats}, 'backswsl/backgroundfeats.tar')
