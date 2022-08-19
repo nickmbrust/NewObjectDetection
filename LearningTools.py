@@ -16,11 +16,12 @@ def OLS(SXX, ytrue, lmda):
         bot = (1+(1/lmda)*X.T@rn@X)
         kn = top/bot
         loss = ytrue[i]-beta.T@X
-        beta = beta - kn @ loss
+        beta = beta + kn @ loss
         rn = (1/lmda)*rn-(1/lmda)*kn*X.T*rn
         errorplot[i] = np.linalg.norm(X.T@beta-ytrue)
 
     return beta
+
 
 def OFSA(SXX, SXY, k, T):
     beta = 0

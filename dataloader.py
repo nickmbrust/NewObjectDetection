@@ -6,7 +6,7 @@ import cv2
 import PIL.Image as Image
 
 
-def loadimgs(mainDir):
+def loadimgs(mainDir, transformer):
     mainDir = mainDir
     cat = os.listdir(mainDir)
     X = []
@@ -20,11 +20,13 @@ def loadimgs(mainDir):
                 imgList.remove(j)
         for img in imgList:
             imgPath = os.path.join(folderPATH, img)
-            loadImg = cv2.imread(imgPath, 0)
+            loadImg = Image.open(imgPath).convert('RGB')
+            loadImg = transformer(loadImg)
             X.append(loadImg)
             y.append(i)
 
     X = np.array(X)
+    X, y = sklearn.utils.shuffle(X, y)
     return X, y
 
 
