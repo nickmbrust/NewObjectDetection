@@ -6,7 +6,7 @@ import cv2
 import PIL.Image as Image
 
 
-def loadimgs(mainDir, transformer):
+def loadimgs(mainDir, transformer, type):
     mainDir = mainDir
     cat = os.listdir(mainDir)
     X = []
@@ -21,14 +21,16 @@ def loadimgs(mainDir, transformer):
         for img in imgList:
             imgPath = os.path.join(folderPATH, img)
             loadImg = Image.open(imgPath).convert('RGB')
-            loadImg = transformer(loadImg)
+            if type == 'swsl':
+                loadImg = transformer(loadImg)
             X.append(loadImg)
             y.append(i)
-
-    X = np.array(X)
+    if type == 'swsl':
+        X = np.array(X)
+        
     X, y = sklearn.utils.shuffle(X, y)
     return X, y
-
+  
 
 def loadClass(classFolder, transformer):
     classDir = classFolder

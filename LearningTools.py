@@ -1,35 +1,37 @@
 import torch
 import rave
 import numpy as np
-def OLS(SXX, ytrue, lmda):
-    n = len(SXX)
-    print(SXX.shape[1])
-    beta = np.zeros((SXX.shape[1],1))
-    errorplot  = np.zeros((len(SXX),1))
-    rn = np.eye(SXX.shape[1])
 
-    for i in range(len(ytrue)):
-        X = torch.reshape(SXX[i],(SXX[i].shape[0], 1))
-        X = X.cpu()
-        X = X.detach().numpy()
-        top = ((1/lmda)*rn@X)
-        bot = (1+(1/lmda)*X.T@rn@X)
-        kn = top/bot
-        loss = ytrue[i]-beta.T@X
-        beta = beta + kn @ loss
-        rn = (1/lmda)*rn-(1/lmda)*kn*X.T*rn
-        errorplot[i] = np.linalg.norm(X.T@beta-ytrue)
+def OLS(SXX, SXY):
+    
+    beta = torch.linalg.solve(SXX, SXY)
 
     return beta
 
 
 def OFSA(SXX, SXY, k, T):
-    beta = 0
-    loss = 1
+    SXX = np.array(SXX.cpu())
+    SXY = np.array(SXY.cpu())
+    print(SXY.shape)
+    beta = np.zeros(len(SXY))
+    eta = 1
     p = len(SXX)
-    mu = np.average(SXX)
-    M = []
+    mu = 1
+    global_indices = torch.arange(0, SXX.shape[0])
     for t in range(T):
-        beta = beta - loss*(SXX*beta-SXY)
-        M[t] = k + (p-k)*np.max(0, (T-t)/(t*mu+T))
-    return beta
+        print(beta.T)
+        eta =  eta*(SXX @ beta.T-SXY.T)
+        beta = np.subtract(beta.T, eta)
+        print(beta)
+        max = np.max((0, (T-t)/(t*mu+T)))
+        print(max)
+        Mt = k + (p-k)*np.max((0, (T-t)/(t*mu+T)))
+        Mt = int(Mt)
+        print(Mt)
+        absbetas = np.abs(beta)
+        indices = np.argsort(-absbetas)
+        print(beta.shape)
+        beta = beta.T
+        beta = beta[indices[0:Mt]].T
+        global_indices = global_indices[indices[0:Mt]]    
+    return beta, global_indices
