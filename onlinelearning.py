@@ -60,65 +60,6 @@ with torch.no_grad():
     postiverave.add(postivefeats.to(device).t(), positivey.t())
     print(postiverave.mxx.shape)
     
-negativerave = r.RAVE()
-
-
-
-negativeclass = torch.load('SWSLclassfeats/n02772753.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-negativeey = torch.tensor(-negativeey.t()).to(device)
-negativerave.add(negativefeats.t().to(device), negativeey)
-del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n02853991.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey)
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n03266479.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n03276921.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativey).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n03443167.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n03802912.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n04076546.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n04190372.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-# negativeclass = torch.load('SWSLclassfeats/n04513584.tar')
-# negativefeats = negativeclass['features']
-# negativeey = torch.ones((1, negativefeats.shape[1]), dtype=torch.float)
-# negativeey = torch.tensor(-negativeey.t()).to(device)
-# negativerave.add(negativefeats.to(device).t(), negativeey.t())
-# del negativeclass, negativefeats, negativeey
-
 
 
 averages = r.RAVE()
@@ -135,8 +76,8 @@ elif alg == "FSA":
     print("Calulating using OFSA")
     print(averages.mxx.shape)
     print(averages.mxy)
-    betas = LT.OFSA(averages.mxx, averages.mxy.t(), 100, 10)
-print(betas.shape)
+    betas = LT.OFSA(averages.mxx, averages.mxy, 100, 10)
+print(betas)
 # classification = []
 # with torch.no_grad():
 #     for x in range(len(Xtest)):

@@ -9,8 +9,8 @@ class RAVE:
         Sx = torch.sum(X, dim=0)
         #Sy = torch.sum(y)
         Sxx = X.t() @ X
+        print(Sxx.shape)
         Sxy = X.t() @ y
-        print(Sxy.shape)
         #Syy = y.t() @ y
         if self.n == 0:
             self.n = n
