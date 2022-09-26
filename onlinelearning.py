@@ -26,7 +26,7 @@ for k in range(len(labels)):
        ytrain.append(1.0)
     else:
        ytrain.append(-1.0)
-alg = 'FSA'
+alg = 'LS'
 
 
 #imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
@@ -51,20 +51,78 @@ else:
 positive = torch.load('SWSLclassfeats/n04045857.tar')
 postivefeats = positive['features']
 print(postivefeats.shape)
-positivey = torch.ones((1, postivefeats.shape[1]), dtype=torch.float)
+positivey = torch.ones((postivefeats.shape[0],1), dtype=torch.float)
 positivey = torch.tensor(positivey).to(device)
 postiverave = r.RAVE()
-print(positivey.t())
-print(postivefeats)
+
 with torch.no_grad():
-    postiverave.add(postivefeats.to(device).t(), positivey.t())
+    postiverave.add(postivefeats.to(device), positivey)
     print(postiverave.mxx.shape)
-    
+
+negativerave = r.RAVE()   
+negativeclass = torch.load('SWSLclassfeats/n02772753.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n02853991.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n03266479.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n03276921.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n03443167.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n03802912.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n04076546.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n04190372.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+del negativeclass, negativefeats, negativeey
+negativeclass = torch.load('SWSLclassfeats/n04513584.tar')
+negativefeats = negativeclass['features']
+negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
+negativerave.add(negativefeats.to(device), -negativeey.to(device))
+del negativeclass, negativefeats, negativeey
 
 
 averages = r.RAVE()
+print(postiverave.mx.shape)
 averages.add_rave(postiverave)
-#averages.add_rave(negativerave)
+averages.add_rave(negativerave)
 
 
 
