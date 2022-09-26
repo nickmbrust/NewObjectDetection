@@ -26,7 +26,7 @@ for k in range(len(labels)):
        ytrain.append(1.0)
     else:
        ytrain.append(-1.0)
-alg = 'LS'
+alg = 'FSA'
 
 
 #imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
@@ -132,8 +132,6 @@ if alg == "LS":
     betas = LT.OLS(averages.mxx.to(device), averages.mxy.to(device))
 elif alg == "FSA":
     print("Calulating using OFSA")
-    print(averages.mxx.shape)
-    print(averages.mxy)
     betas = LT.OFSA(averages.mxx, averages.mxy, 100, 10)
 print(betas)
 # classification = []
