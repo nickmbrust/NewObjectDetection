@@ -48,6 +48,6 @@ def clipextract(x, y):
         featuresclip = modelclip.encode_image(img.to(device))
         features.append(featuresclip)
         featuresclip = torch.tensor(featuresclip)
-    return features
+    return featuresclip
 # torch.save({"features": clipfeats}, 'Clipclassfeatures/n03628765.tar')
 #torch.save({"features": swslfeats}, 'backswsl/backgroundfeats.tar')
