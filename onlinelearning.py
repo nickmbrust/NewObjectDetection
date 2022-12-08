@@ -21,7 +21,7 @@ pathtest = PATH+ 'test/'
 swsltransformer = f.swsl_transform(128)
 cliptransformer = f.Clip_transform(128)
 
-alg = 'FSA'
+alg = 'FSAU'
 exttype = 'clip'
 
 #imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
@@ -60,12 +60,18 @@ if exttype == 'clip':
 else:
     imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
 ytest = []
-
-for h in range(len(labelstest)):
-    if labelstest[h] == "backpack":
-        ytest.append(1.0)
-    else:
-        ytest.append(-1.0)
+if exttype == "clip":
+    for h in range(73):
+        if labelstest[h] == "backpack":
+            ytest.append(1.0)
+        else:
+            ytest.append(-1.0)
+else:
+    for h in range(len(labelstest)):
+        if labelstest[h] == "backpack":
+            ytest.append(1.0)
+        else:
+            ytest.append(-1.0)
 ytest = torch.tensor(ytest)
 if exttype == 'clip':
     Xtest = ext.clipextract(imgs, labelstest)

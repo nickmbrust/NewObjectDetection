@@ -43,7 +43,7 @@ def clipextract(x, y):
     images = []
     text = clip.tokenize(y).to(device)
     features = []
-    for i in range(136):
+    for i in range(73):
         img = preprocess(x[i]).unsqueeze(0)
         featuresclass= modelclip.encode_image(img.to(device))
         features.append(featuresclass)
