@@ -3,9 +3,9 @@ import featureExtractor as ext
 import torch
 from features import swsl_transform
 
-PATH = 'dataset/training/n0'
+PATH = 'dataset/training/'
 
-pathload = PATH+ '2772753'
+pathload = PATH+ 'ukulele'
 
 # swslpreprocess = swsl_transform(128)
 # imgs, labels = dl.loadClass(pathload, swslpreprocess)
@@ -20,4 +20,4 @@ imgs, labels = dl.loadClip(pathload)
 clipfeatures = ext.clipextract(imgs, labels)
 print(clipfeatures)
 print(clipfeatures.shape)
-torch.save({"features": clipfeatures}, 'Clipclassfeatures/n02772753.tar')
+torch.save({"features": clipfeatures}, 'Clipclassfeatures/n04513584.tar')

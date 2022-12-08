@@ -14,6 +14,7 @@ import features as f
 import numpy as np
 import gc
 from torch.utils.data import TensorDataset, DataLoader, Dataset
+from getdata import *
 PATH = 'dataset/'
 pathtrain = PATH+ 'training/'
 pathtest = PATH+ 'test/'
@@ -21,16 +22,9 @@ swsltransformer = f.swsl_transform(128)
 cliptransformer = f.Clip_transform(128)
 
 alg = 'FSA'
+exttype = 'clip'
 
-
-imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
-ytest = []
-
-for h in range(len(labelstest)):
-    if labelstest[h] == "racket":
-        ytest.append(1.0)
-    else:
-        ytest.append(-1.0)
+#imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
@@ -40,83 +34,12 @@ else:
     print("running on cpu")
 
 
-Xtest = ext.swslextract(imgs)
-print(len(Xtest))
-positive = torch.load('SWSLclassfeats/n02772753.tar')
-postivefeats = positive['features']
-positivey = torch.ones((postivefeats.shape[0],1), dtype=torch.float)
-positivey = torch.tensor(positivey).to(device)
-postiverave = r.RAVE()
-negatives = torch.ones((1092, 1), dtype = int)
-
-
-with torch.no_grad():
-    postiverave.add(postivefeats.to(device), positivey)
-    print(postiverave.mxx.shape)
-
-negativerave = r.RAVE()   
-negativeclass = torch.load('SWSLclassfeats/n04045857.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n02853991.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n03266479.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n03276921.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n03443167.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n03802912.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n04076546.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n04190372.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-del negativeclass, negativefeats, negativeey
-negativeclass = torch.load('SWSLclassfeats/n04513584.tar')
-negativefeats = negativeclass['features']
-negativeey = torch.ones((negativefeats.shape[0], 1), dtype=torch.float)
-negativerave.add(negativefeats.to(device), -negativeey.to(device))
-del negativeclass, negativefeats, negativeey
-
-
-averages = r.RAVE()
-averages.add_rave(postiverave)
-averages.add_rave(negativerave)
+# Xtest = ext.swslextract(imgs)
+# print(len(Xtest))
+if exttype == 'clip':
+    averages, postiverave, negativerave = getCliprave()
+else:
+    averages, postiverave, negativerave = getSWSLrave()
 
 
 XXn, XYn, pi = averages.standardize()
@@ -129,11 +52,13 @@ elif alg == "FSA":
     print("Calulating using OFSA")
     betas, indicies = LT.OFSA(XXn.to(device), averages.mxy.t().to(device),2048, 200)
 elif alg == "FSAU":
-    betas = LT.FSAunbalanced(postiverave, negativerave, 100, 50)
+    betas= LT.FSAunbalanced(postiverave, negativerave, 100, 50)
 print(betas)
 
-
-imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
+if exttype == 'clip':
+    imgs, labelstest = loadimgs(pathtest, cliptransformer, 'clip')
+else:
+    imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
 ytest = []
 
 for h in range(len(labelstest)):
@@ -142,9 +67,13 @@ for h in range(len(labelstest)):
     else:
         ytest.append(-1.0)
 ytest = torch.tensor(ytest)
-Xtest = ext.swslextract(imgs)
-if alg == 'FSA' or 'FSAU':
+if exttype == 'clip':
+    Xtest = ext.clipextract(imgs, labelstest)
+else:
+    Xtest = ext.swslextract(imgs)
+if alg == 'FSA':
     Xtest = Xtest - averages.mx
     Xtest = Xtest * pi
-    Xtest = Xtest[:, indicies]
-print(LT.err(Xtest.to(device), ytest.to(device), betas.t()))
+    #Xtest = Xtest[:, indicies]
+
+LT.test(Xtest.to(device), ytest.to(device), betas.t())

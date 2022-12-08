@@ -1,6 +1,6 @@
 electric guitar  1 n03276921
 reflex camera  2 n04076546
-glass               3 n03443167
+wine glass               3 n03443167
 knife               4 n03628765
 racket             5 n04045857
 mug		   6 n03802912

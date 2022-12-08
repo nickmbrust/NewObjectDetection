@@ -2,6 +2,7 @@ from asyncio import base_tasks
 import torch
 import rave
 import numpy as np
+from sklearn.metrics import *
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
     print("running on cuda")
@@ -72,19 +73,21 @@ def FSAunbalanced(Xpos, Xneg, k, T):
     mun = Xneg.mx
     wp = 1/(SXXp.shape[0])
     wn = 1/(SXXn.shape[0])
-    beta = torch.zeros((SXXp.shape[0], 1)).to(device)
-    eta = 1
+    beta = torch.zeros((1, SXXp.shape[0])).to(device)
+    beta0 = torch.zeros((1, SXXp.shape[0])).to(device)
+    eta = 0.1
     p = len(SXXp)
     mu = 0.1
     global_indices = torch.arange(0, SXXn.shape[0])
     for t in range(T):
+
+        deltab0 = eta*(beta@(wp*mup + wn*mun)+(wp + wn)*beta0 + wn - wp )
+        beta0 = beta-deltab0
       
+        deltab =  eta*(beta@(wp*SXXp + wn*SXXn)+(wp*mup + wn*mun)*beta0 + wn*mun - wp*mup )
+        beta = beta - deltab
        
-        
-        delta =  eta*((wp*SXXp + wn*SXXn)*beta+(wp*mup + wn*mun)*beta[0] + wn*mun - wp*mup )
-        print(delta)
-        beta = beta - delta
-        
+        print(beta0.shape)
         print(beta.shape)
         # max = np.max((0, (T-t)/(t*mu+T)))
         # Mt = k + (p-k)*np.max((0, (T-t)/(t*mu+T)))
@@ -103,32 +106,19 @@ def FSAunbalanced(Xpos, Xneg, k, T):
     return beta
 
 def test(Xtest, Ytest, betas):
-    yhat = Xtest @ betas
-   
-    tp = 0
-    fp = 0
-    tn = 0
-    fn = 0
-    
-    for i in range(yhat.shape[0]):
-        item = yhat[i].item()
-        if item < 0:
-            guess= -1
-        else:
-            guess = 1
-        if guess == Ytest[i]:
-            if guess == 1:
-                tp+=1
-            if guess == -1:
-                tn+=1
-        if guess != Ytest[i]:
-            if guess == 1:
-                fp+=1
-            if guess == -1:
-                fn+=1
-    precision = tp/(tp+fp)
-    recall = tp/(tp+fn)
-    print(precision, recall)
+    yhat = Xtest @ betas.view(-1,1)
+    yhat[yhat<0] = -1
+    yhat[yhat>=0] = 1
+    Ytest = Ytest.detach().numpy()
+    yhat = yhat.t().detach().numpy()
+    precision = average_precision_score(Ytest, yhat[0])
+    recall = recall_score(Ytest, yhat[0])
+    F1 = f1_score(Ytest, yhat[0])
+    print("Precision: ", precision)
+    print("Recall: ", recall)
+    print("F1: ", F1)
+
+
 
 def get_loss(x, y, beta): 
     xbeta = x@beta.view(-1, 1)

@@ -43,11 +43,12 @@ def clipextract(x, y):
     images = []
     text = clip.tokenize(y).to(device)
     features = []
-    for i in range(73):
+    for i in range(136):
         img = preprocess(x[i]).unsqueeze(0)
-        featuresclip = modelclip.encode_image(img.to(device))
-        features.append(featuresclip)
-        featuresclip = torch.tensor(featuresclip)
+        featuresclass= modelclip.encode_image(img.to(device))
+        features.append(featuresclass)
+    with torch.no_grad():
+        featuresclip = torch.cat(features)
     return featuresclip
 # torch.save({"features": clipfeats}, 'Clipclassfeatures/n03628765.tar')
 #torch.save({"features": swslfeats}, 'backswsl/backgroundfeats.tar')
