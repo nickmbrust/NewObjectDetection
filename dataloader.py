@@ -4,7 +4,12 @@ import os
 import sklearn.utils
 import cv2
 import PIL.Image as Image
-
+import rave as R
+if torch.cuda.is_available():
+    device = torch.device("cuda:0")
+else:
+    device = torch.device("cpu")
+    
 
 def loadimgs(mainDir, transformer, type):
     mainDir = mainDir
@@ -61,3 +66,23 @@ def loadClip(classFolder):
 
     return X, y
 
+def loadRave(Path, positive):
+    positivepath = os.path.join(Path, positive)
+    positiveclass = torch.load(positivepath, map_location=device)
+    positivefeatures = positiveclass['features']
+    positiverave = R.RAVE()
+    positivey = torch.ones((positivefeatures.shape[0],1), dtype=torch.float)
+    positiverave.add(positivefeatures, positivey.to(device))
+    negativerave = R.RAVE()
+    li = os.listdir(Path)
+    for i in li:
+        negpath = os.path.join(Path, i)
+        if negpath == positivepath:
+            continue
+        negclass = torch.load(negpath, map_location=device)
+        negfeats = negclass['features']
+        negativeey = torch.ones((negfeats.shape[0], 1), dtype=torch.float)
+        negativerave.add(negfeats, -negativeey.to(device))
+        print(negpath, " done")
+    print()
+    return positiverave, negativerave

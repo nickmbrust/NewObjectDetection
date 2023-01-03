@@ -8,7 +8,7 @@ import torch
 import rave as r
 import sklearn as sk
 import LearningTools as LT
-from dataloader import loadimgs
+from dataloader import loadimgs, loadRave
 import featureExtractor as ext
 import features as f
 import numpy as np
@@ -22,7 +22,11 @@ swsltransformer = f.swsl_transform(128)
 cliptransformer = f.Clip_transform(128)
 
 alg = 'FSAU'
-exttype = 'clip'
+exttype = 'SWSL'
+if exttype == 'SWSL':
+    eta = 0.1
+elif exttype == 'clip':
+    eta = 5
 
 #imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
 
@@ -36,12 +40,15 @@ else:
 
 # Xtest = ext.swslextract(imgs)
 # print(len(Xtest))
-if exttype == 'clip':
-    averages, postiverave, negativerave = getCliprave()
-else:
-    averages, postiverave, negativerave = getSWSLrave()
+# if exttype == 'clip':
+#     averages, postiverave, negativerave = getCliprave()
+# else:
+#     averages, postiverave, negativerave = getSWSLrave()
 
-
+positiverave, negativerave = loadRave("SWSLclassfeats/", "n02772753.tar")
+averages = r.RAVE()
+averages.add_rave(positiverave)
+averages.add_rave(negativerave)
 XXn, XYn, pi = averages.standardize()
 
 
@@ -52,7 +59,7 @@ elif alg == "FSA":
     print("Calulating using OFSA")
     betas, indicies = LT.OFSA(XXn.to(device), averages.mxy.t().to(device),2048, 200)
 elif alg == "FSAU":
-    betas= LT.FSAunbalanced(postiverave, negativerave, 100, 50)
+    betas= LT.FSAunbalanced(positiverave, negativerave, 100, 50, eta)
 print(betas)
 
 if exttype == 'clip':

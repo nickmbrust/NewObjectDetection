@@ -64,7 +64,7 @@ def OFSA(SXX, SXY, k, T):
     global_indices = global_indices[indices[0][0:Mt]]
     return beta, global_indices
 
-def FSAunbalanced(Xpos, Xneg, k, T):
+def FSAunbalanced(Xpos, Xneg, k, T, eta):
      
     #print(SXY.shape)
     SXXp = Xpos.mxx
@@ -75,7 +75,6 @@ def FSAunbalanced(Xpos, Xneg, k, T):
     wn = 1/(SXXn.shape[0])
     beta = torch.zeros((1, SXXp.shape[0])).to(device)
     beta0 = torch.zeros((1, SXXp.shape[0])).to(device)
-    eta = 0.1
     p = len(SXXp)
     mu = 0.1
     global_indices = torch.arange(0, SXXn.shape[0])
@@ -106,11 +105,12 @@ def FSAunbalanced(Xpos, Xneg, k, T):
     return beta
 
 def test(Xtest, Ytest, betas):
-    yhat = Xtest @ betas.view(-1,1)
+    print()
+    yhat = Xtest.float() @ betas.view(-1,1)
     yhat[yhat<0] = -1
     yhat[yhat>=0] = 1
-    Ytest = Ytest.detach().numpy()
-    yhat = yhat.t().detach().numpy()
+    Ytest = Ytest.detach().cpu().numpy()
+    yhat = yhat.t().detach().cpu().numpy()
     precision = average_precision_score(Ytest, yhat[0])
     recall = recall_score(Ytest, yhat[0])
     F1 = f1_score(Ytest, yhat[0])
