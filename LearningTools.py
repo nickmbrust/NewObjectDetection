@@ -126,7 +126,7 @@ def testunlabled(Xtest, betas, pics):
     yhat[yhat>=0] = 1
     for i in range(len(yhat)):
         if yhat[i] == 1:
-            img = pics[i]
+            img = pics[i]/255
             save = transform(img)
             save.save('returnimages/'+str(i)+'.jpg')
 
