@@ -89,4 +89,5 @@ if alg == 'FSA':
     Xtest = Xtest * pi
     #Xtest = Xtest[:, indicies]
 
-LT.test(Xtest.to(device), ytest.to(device), betas.t())
+#LT.test(Xtest.to(device), ytest.to(device), betas.t())
+LT.testunlabled(Xtest.to(device), betas.t(), imgs)

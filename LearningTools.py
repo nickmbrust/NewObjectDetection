@@ -3,6 +3,8 @@ import torch
 import rave
 import numpy as np
 from sklearn.metrics import *
+import torchvision.transforms as T
+from PIL import Image
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
     print("running on cuda")
@@ -105,7 +107,6 @@ def FSAunbalanced(Xpos, Xneg, k, T, eta):
     return beta
 
 def test(Xtest, Ytest, betas):
-    print()
     yhat = Xtest.float() @ betas.view(-1,1)
     yhat[yhat<0] = -1
     yhat[yhat>=0] = 1
@@ -118,7 +119,16 @@ def test(Xtest, Ytest, betas):
     print("Recall: ", recall)
     print("F1: ", F1)
 
-
+def testunlabled(Xtest, betas, pics):
+    transform = T.ToPILImage()
+    yhat = Xtest.float() @ betas.view(-1,1)
+    yhat[yhat<0] = -1
+    yhat[yhat>=0] = 1
+    for i in range(len(yhat)):
+        if yhat[i] == 1:
+            img = pics[i]
+            save = transform(img)
+            save.save('returnimages/'+str(i)+'.jpg')
 
 def get_loss(x, y, beta): 
     xbeta = x@beta.view(-1, 1)
@@ -126,6 +136,7 @@ def get_loss(x, y, beta):
     loss = torch.log(1 + torch.exp(-yxbeta))
     ll_s = torch.mean(loss)
     return ll_s 
+
 def err(x,y,beta): 
     xbeta = x@beta.view(-1,1)
     xbeta[xbeta<0] = -1
