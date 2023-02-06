@@ -22,7 +22,7 @@ pathtest = PATH + 'test'
 def swslextract(x):
     #print(type(x[0]))
     #SWSLset = TensorDataset(x)
-    dataloaderSWSL = DataLoader(x, batch_size = 3)
+    dataloaderSWSL = DataLoader(x, batch_size = 2)
     print(dataloaderSWSL)
     torch.hub.list('facebookresearch/semi-supervised-ImageNet1K-models')
     model = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnet50_swsl')
@@ -30,13 +30,25 @@ def swslextract(x):
     model.eval()
     batchfeatures = []
     for imgBatch in dataloaderSWSL:
-        batchfeatures.append(f.swslfeatures(model, imgBatch.to(device)))
+        features = f.swslfeatures(model, imgBatch.to(device))
+        batchfeatures.append(features.detach().cpu())
         del imgBatch
     swslfeats = torch.tensor(batchfeatures[0])
     with torch.no_grad():
         torch.cat(batchfeatures, out = swslfeats)
     return swslfeats
-
+def newclip(x):
+    dataloaderclip = DataLoader(x, batch_size = 2)
+    print(dataloaderclip)
+    modelclip, preprocess = clip.load('RN50x4', device)
+    batchfeatures = []
+    for imgBatch in dataloaderclip:
+        features = f.Clipfeatures(modelclip.visual, imgBatch.to(device))
+        batchfeatures.append(features.detach().cpu())
+        del imgBatch
+    swslfeats = torch.tensor(batchfeatures[0])
+    with torch.no_grad():
+        torch.cat(batchfeatures, out = swslfeats)
 def clipextract(x, y):
 # # ClIP
     modelclip, preprocess = clip.load('RN50x4', device)

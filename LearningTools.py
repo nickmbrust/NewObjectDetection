@@ -120,14 +120,17 @@ def test(Xtest, Ytest, betas):
     print("F1: ", F1)
 
 def testunlabled(Xtest, betas, pics):
-    transform = T.ToPILImage()
+    transform =  T.Compose([T.ToTensor(), T.Normalize(mean = [ 0., 0., 0. ],
+                                                         std = [ 1/0.229, 1/0.224, 1/0.225 ]),
+                               T.Normalize(mean = [ -0.485, -0.456, -0.406 ],
+                                           std = [ 1., 1., 1. ]), T.ToPILImage()])
+
     yhat = Xtest.float() @ betas.view(-1,1)
     yhat[yhat<0] = -1
     yhat[yhat>=0] = 1
     for i in range(len(yhat)):
         if yhat[i] == 1:
-            img = pics[i]/255
-            save = transform(img)
+            save = transform(pics[i].T)
             save.save('returnimages/'+str(i)+'.jpg')
 
 def get_loss(x, y, beta): 

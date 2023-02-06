@@ -25,7 +25,7 @@ def Clip_transform(n_px):
 def Clipfeatures(net, x):
     x = x.type(net.conv1.weight.dtype)
     for conv, bn in [(net.conv1, net.bn1), (net.conv2, net.bn2), (net.conv3, net.bn3)]:
-        x = net.relu(bn(conv(x)))
+        x = F.relu(bn(conv(x)))
     # print(1,x.shape)
     x = net.avgpool(x)
     x = net.layer1(x)

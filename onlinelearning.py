@@ -8,7 +8,7 @@ import torch
 import rave as r
 import sklearn as sk
 import LearningTools as LT
-from dataloader import loadimgs, loadRave
+from dataloader import loadimgs, loadRave, loadClass
 import featureExtractor as ext
 import features as f
 import numpy as np
@@ -17,7 +17,7 @@ from torch.utils.data import TensorDataset, DataLoader, Dataset
 from getdata import *
 PATH = 'dataset/'
 pathtrain = PATH+ 'training/'
-pathtest = PATH+ 'test/'
+pathtest = 'ILSVRC2012_img_val'
 swsltransformer = f.swsl_transform(128)
 cliptransformer = f.Clip_transform(128)
 
@@ -50,8 +50,9 @@ averages = r.RAVE()
 averages.add_rave(positiverave)
 averages.add_rave(negativerave)
 XXn, XYn, pi = averages.standardize()
-
-
+classdict = torch.load('classes_val.pth')
+classimg = classdict['n02769748']
+testset = 'large'
 if alg == "LS":
     print("Calculating Least Squares")
     betas = LT.OLS(averages.mxx.to(device), averages.mxy.to(device))
@@ -65,17 +66,25 @@ print(betas)
 if exttype == 'clip':
     imgs, labelstest = loadimgs(pathtest, cliptransformer, 'clip')
 else:
-    imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
-ytest = []
-if exttype == "clip":
-    for h in range(73):
-        if labelstest[h] == "backpack":
-            ytest.append(1.0)
-        else:
-            ytest.append(-1.0)
+    imgs, labelstest = loadClass(pathtest, swsltransformer)
+if testset == 'small':
+    ytest = []
+    if exttype == "clip":
+        for h in range(73):
+            if labelstest[h] == "backpack":
+                ytest.append(1.0)
+            else:
+                ytest.append(-1.0)
+    else:
+        for h in range(len(labelstest)):
+            if labelstest[h] == "backpack":
+                ytest.append(1.0)
+            else:
+                ytest.append(-1.0)
 else:
-    for h in range(len(labelstest)):
-        if labelstest[h] == "backpack":
+    ytest = []
+    for i in labelstest:
+        if i in classimg:
             ytest.append(1.0)
         else:
             ytest.append(-1.0)
@@ -89,5 +98,5 @@ if alg == 'FSA':
     Xtest = Xtest * pi
     #Xtest = Xtest[:, indicies]
 
-#LT.test(Xtest.to(device), ytest.to(device), betas.t())
-LT.testunlabled(Xtest.to(device), betas.t(), imgs)
+LT.test(Xtest.to(device), ytest.to(device), betas.t())
+#LT.testunlabled(Xtest.to(device), betas.t(), imgs)
