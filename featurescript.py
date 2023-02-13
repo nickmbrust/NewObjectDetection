@@ -3,9 +3,9 @@ import featureExtractor as ext
 import torch
 from features import swsl_transform, Clip_transform
 
-PATH = 'backgrounddata/images'
+PATH = 'dataset/training/n0'
 
-pathload = PATH
+pathload = PATH + '4513584'
 
 # swslpreprocess = swsl_transform(128)
 # imgs, labels = dl.loadClass(pathload, swslpreprocess)
@@ -15,8 +15,8 @@ pathload = PATH
 # del imgs, labels, swslfeatures
 
 
-clippreprocess = Clip_transform(128)
+clippreprocess = Clip_transform(288)
 imgs, labels = dl.loadClass(pathload, clippreprocess)
 clipfeatures = ext.newclip(imgs)
 print(clipfeatures)
-torch.save({"features": clipfeatures}, 'Clipclassfeatures/background.tar')
+torch.save({"features": clipfeatures}, 'Clipclassfeatures/n04513584.tar')

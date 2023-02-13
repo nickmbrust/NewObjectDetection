@@ -2,6 +2,7 @@ import torch
 import rave as r
 import features as f
 import featureExtractor as FE
+from dataloader import loadimgs, loadClass
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
     print("running on cuda")
@@ -171,3 +172,23 @@ def getCliprave():
     averages.add_rave(negativerave)
 
     return averages, postiverave, negativerave
+def gettrainingdata(feattype):
+    PATH = 'dataset/'
+    pathtrain = PATH+ 'training/'
+    ytrain = []
+    if feattype == 'swsl':
+        transform = f.swsl_transform(128)
+        imgs, labelstrain = loadimgs(pathtrain, transform, 'swsl')
+        Xtrain = FE.swslextract(imgs)
+    if feattype == 'clip':
+        transform = f.Clip_transform(228)
+        imgs, labelstrain = loadimgs(pathtrain, transform, 'clip')
+        Xtrain = FE.newclip(imgs)
+    for h in range(len(labelstrain)):
+        if labelstrain[h] == "n02772753":
+            ytrain.append(1.0)
+        else:
+            ytrain.append(-1.0)
+    ytrain = torch.tensor(ytrain)
+    return Xtrain, ytrain
+    

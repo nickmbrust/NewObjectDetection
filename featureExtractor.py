@@ -49,6 +49,7 @@ def newclip(x):
     swslfeats = torch.tensor(batchfeatures[0])
     with torch.no_grad():
         torch.cat(batchfeatures, out = swslfeats)
+    return batchfeatures
 def clipextract(x, y):
 # # ClIP
     modelclip, preprocess = clip.load('RN50x4', device)

@@ -17,16 +17,17 @@ from torch.utils.data import TensorDataset, DataLoader, Dataset
 from getdata import *
 PATH = 'dataset/'
 pathtrain = PATH+ 'training/'
-pathtest = 'ILSVRC2012_img_val'
+pathtest = 'dataset/ILSVRC2012_img_val/'
+#pathtest = PATH+ 'test/'
 swsltransformer = f.swsl_transform(128)
 cliptransformer = f.Clip_transform(128)
-
+eta = 0.1
 alg = 'FSAU'
 exttype = 'SWSL'
-if exttype == 'SWSL':
-    eta = 0.1
-elif exttype == 'clip':
-    eta = 5
+# if exttype == 'SWSL':
+#     eta = 0.1
+# elif exttype == 'clip':
+#     eta = 5
 
 #imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
 
@@ -38,12 +39,7 @@ else:
     print("running on cpu")
 
 
-# Xtest = ext.swslextract(imgs)
-# print(len(Xtest))
-# if exttype == 'clip':
-#     averages, postiverave, negativerave = getCliprave()
-# else:
-#     averages, postiverave, negativerave = getSWSLrave()
+
 
 positiverave, negativerave = loadRave("SWSLclassfeats/", "n02772753.tar")
 averages = r.RAVE()
@@ -52,6 +48,7 @@ averages.add_rave(negativerave)
 XXn, XYn, pi = averages.standardize()
 classdict = torch.load('classes_val.pth')
 classimg = classdict['n02769748']
+classimg = [r.upper() for r in classimg]
 testset = 'large'
 if alg == "LS":
     print("Calculating Least Squares")
@@ -60,43 +57,40 @@ elif alg == "FSA":
     print("Calulating using OFSA")
     betas, indicies = LT.OFSA(XXn.to(device), averages.mxy.t().to(device),2048, 200)
 elif alg == "FSAU":
-    betas= LT.FSAunbalanced(positiverave, negativerave, 100, 50, eta)
+    betas= LT.FSAunbalanced(positiverave, negativerave, 500, 50, eta)
 print(betas)
-
-if exttype == 'clip':
-    imgs, labelstest = loadimgs(pathtest, cliptransformer, 'clip')
+if testset == 'small':
+    if exttype == 'clip':
+        imgs, labelstest = loadimgs(pathtest, cliptransformer, 'clip')
+    elif exttype == 'SWSL':
+         imgs, labelstest = loadimgs(pathtest, swsltransformer, 'swsl')
 else:
     imgs, labelstest = loadClass(pathtest, swsltransformer)
+
+Xtrain, ytrain = gettrainingdata('swsl')
 if testset == 'small':
     ytest = []
-    if exttype == "clip":
-        for h in range(73):
-            if labelstest[h] == "backpack":
-                ytest.append(1.0)
-            else:
-                ytest.append(-1.0)
-    else:
-        for h in range(len(labelstest)):
-            if labelstest[h] == "backpack":
-                ytest.append(1.0)
-            else:
-                ytest.append(-1.0)
+    for h in range(len(labelstest)):
+        if labelstest[h] == "backpack":
+            ytest.append(1.0)
+        else:
+            ytest.append(-1.0)
 else:
     ytest = []
     for i in labelstest:
-        if i in classimg:
+        if i.upper() in classimg:
             ytest.append(1.0)
         else:
             ytest.append(-1.0)
 ytest = torch.tensor(ytest)
 if exttype == 'clip':
-    Xtest = ext.clipextract(imgs, labelstest)
+    Xtest = ext.newclip(imgs)
 else:
     Xtest = ext.swslextract(imgs)
 if alg == 'FSA':
     Xtest = Xtest - averages.mx
     Xtest = Xtest * pi
     #Xtest = Xtest[:, indicies]
-
-LT.test(Xtest.to(device), ytest.to(device), betas.t())
+LT.neighbor(Xtrain, ytrain, Xtest, ytest)
+#LT.test(Xtest.to(device), ytest.to(device), betas.t())
 #LT.testunlabled(Xtest.to(device), betas.t(), imgs)

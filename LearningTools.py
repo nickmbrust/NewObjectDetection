@@ -3,6 +3,7 @@ import torch
 import rave
 import numpy as np
 from sklearn.metrics import *
+from sklearn.neighbors import NeighborhoodComponentsAnalysis, KNeighborsClassifier
 import torchvision.transforms as T
 from PIL import Image
 if torch.cuda.is_available():
@@ -146,3 +147,18 @@ def err(x,y,beta):
     xbeta[xbeta>=0] = 1
     
     return torch.mean((xbeta.view(-1)!=y).float())
+
+
+def neighbor(Xtrain, ytrain, Xtest, ytest):
+    Xtrain = Xtrain.cpu()
+    ytrain = ytrain.cpu()
+    model = KNeighborsClassifier()
+    model.fit(Xtrain, ytrain)
+    yhat = model.predict(Xtest)
+    precision = average_precision_score(ytest, yhat)
+    recall = recall_score(ytest, yhat)
+    F1 = f1_score(ytest, yhat)
+    print("Precision: ", precision)
+    print("Recall: ", recall)
+    print("F1: ", F1)
+    

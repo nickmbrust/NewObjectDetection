@@ -5,6 +5,7 @@ import sklearn.utils
 import cv2
 import PIL.Image as Image
 import rave as R
+import features as f
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
 else:
@@ -64,8 +65,8 @@ def loadClip(classFolder):
         X.append(loadImg)
         y.append(cat[i])
 
-    return X, y
-
+    return X, y    
+    
 def loadRave(Path, positive):
     positivepath = os.path.join(Path, positive)
     positiveclass = torch.load(positivepath, map_location=device)
